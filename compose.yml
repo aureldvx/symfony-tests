@@ -1,0 +1,88 @@
+services:
+    php:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        container_name: dc3dev_symfony_tests_php
+        entrypoint: "tail -f /dev/null"
+        networks:
+            - default
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www/html
+        working_dir: /var/www/html
+
+    web:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        container_name: dc3dev_symfony_tests_web
+        depends_on:
+            - php
+            - database
+        labels:
+            caddy: "symfony-tests.aaa"
+            caddy.tls: internal
+            caddy.reverse_proxy: "{{upstreams 80}}"
+        networks:
+            - default
+            - global_reverse_proxy
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www/html
+        working_dir: /var/www/html
+
+    database:
+        container_name: dc3dev_symfony_tests_database
+        image: "mysql:8.1"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: prod
+            MYSQL_USERNAME: prod
+            MYSQL_ROOT_PASSWORD: prod
+            MYSQL_PASSWORD: prod
+        networks:
+            - default
+        restart: unless-stopped
+
+    database_test:
+        container_name: dc3dev_symfony_tests_database_test
+        image: "mysql:8.1"
+        volumes:
+            - mysql_test_data:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: test
+            MYSQL_USER: test
+            MYSQL_ROOT_PASSWORD: test
+            MYSQL_PASSWORD: test
+        networks:
+            - default
+        restart: unless-stopped
+
+    phpmyadmin:
+        container_name: dc3dev_symfony_tests_phpmyadmin
+        depends_on:
+            - database
+            - database_test
+        environment:
+            PMA_HOSTS: "database, database_test"
+        image: phpmyadmin
+        labels:
+            caddy: "db.symfony-tests.aaa"
+            caddy.tls: internal
+            caddy.reverse_proxy: "{{upstreams 80}}"
+        networks:
+            - default
+            - global_reverse_proxy
+        restart: unless-stopped
+
+volumes:
+    mysql_data: { }
+    mysql_test_data: { }
+
+networks:
+    default:
+        driver: bridge
+    global_reverse_proxy:
+        external: true
