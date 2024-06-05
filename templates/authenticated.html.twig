@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Protégé' %}
+
+{% block body %}
+    <h1>Page protégée</h1>
+    <p>{{ app.user.email }}</p>
+{% endblock %}

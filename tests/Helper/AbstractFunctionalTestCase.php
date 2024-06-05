@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+namespace App\Tests\Helper;
+
+use App\Entity\User;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

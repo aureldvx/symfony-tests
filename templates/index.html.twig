@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Accueil' %}
+
+{% block body %}
+    <h1>Page d'accueil</h1>
+
+    <a href="{{ path('about') }}" data-testid="link">About</a>
+    <a href="{{ path('redir') }}" data-testid="redir">Redirection</a>
+{% endblock %}
